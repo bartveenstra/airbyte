@@ -13,11 +13,22 @@ dependencies {
     implementation project(':airbyte-config:config-models')
     implementation libs.airbyte.protocol
     implementation project(':airbyte-integrations:bases:base-java')
+    implementation project(':airbyte-integrations:bases:base-java-s3')
     implementation project(':airbyte-integrations:connectors:destination-jdbc')
     implementation files(project(':airbyte-integrations:bases:base-java').airbyteDocker.outputs)
 
     implementation 'com.azure:azure-storage-blob:12.20.2'
     implementation 'org.apache.commons:commons-csv:1.4'
+
+    // parquet
+    implementation ('org.apache.hadoop:hadoop-common:3.3.3') {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+        exclude group: 'org.slf4j', module: 'slf4j-reload4j'
+    }
+    implementation ('org.apache.parquet:parquet-avro:1.12.3') { exclude group: 'org.slf4j', module: 'slf4j-log4j12'}
+    implementation ('com.github.airbytehq:json-avro-converter:1.1.0') { exclude group: 'ch.qos.logback', module: 'logback-classic'}
+
+    implementation ('org.apache.hadoop:hadoop-azure-datalake:3.3.3') { exclude group: 'org.slf4j', module: 'slf4j-log4j12'}
 
     testImplementation project(':airbyte-integrations:bases:standard-destination-test')
 

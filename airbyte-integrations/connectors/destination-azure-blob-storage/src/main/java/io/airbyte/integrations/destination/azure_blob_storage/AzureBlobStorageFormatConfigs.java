@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.airbyte.commons.json.Jsons;
 import io.airbyte.integrations.destination.azure_blob_storage.csv.AzureBlobStorageCsvFormatConfig;
 import io.airbyte.integrations.destination.azure_blob_storage.jsonl.AzureBlobStorageJsonlFormatConfig;
+import io.airbyte.integrations.destination.azure_blob_storage.parquet.AzureBlobStorageParquetFormatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,9 @@ public class AzureBlobStorageFormatConfigs {
       }
       case JSONL -> {
         return new AzureBlobStorageJsonlFormatConfig();
+      }
+      case PARQUET -> {
+        return new AzureBlobStorageParquetFormatConfig();
       }
       default -> throw new RuntimeException("Unexpected output format: " + Jsons.serialize(config));
 

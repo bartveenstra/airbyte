@@ -7,7 +7,10 @@ package io.airbyte.integrations.destination.azure_blob_storage;
 public enum AzureBlobStorageFormat {
 
   CSV("csv"),
-  JSONL("jsonl");
+  JSONL("jsonl"),
+  PARQUET("parquet"),
+
+  AVRO("avro");
 
   private final String fileExtension;
 

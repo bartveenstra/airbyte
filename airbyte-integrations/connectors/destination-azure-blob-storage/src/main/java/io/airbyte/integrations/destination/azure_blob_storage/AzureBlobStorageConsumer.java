@@ -63,8 +63,9 @@ public class AzureBlobStorageConsumer extends FailureTrackingAirbyteMessageConsu
 
     for (final ConfiguredAirbyteStream configuredStream : configuredCatalog.getStreams()) {
 
+      Timestamp timestamp = new Timestamp(System.currentTimeMillis());
       final String blobName = configuredStream.getStream().getName() + "/" +
-          getOutputFilename(new Timestamp(System.currentTimeMillis()));
+          getOutputFilename(timestamp);
       final AppendBlobClient appendBlobClient = specializedBlobClientBuilder
           .blobName(blobName)
           .buildAppendBlobClient();
@@ -72,7 +73,7 @@ public class AzureBlobStorageConsumer extends FailureTrackingAirbyteMessageConsu
       createContainers(specializedBlobClientBuilder, appendBlobClient, configuredStream);
 
       final AzureBlobStorageWriter writer = writerFactory
-          .create(azureBlobStorageDestinationConfig, appendBlobClient, configuredStream);
+          .create(azureBlobStorageDestinationConfig, appendBlobClient, configuredStream, timestamp);
 
       final AirbyteStream stream = configuredStream.getStream();
       final AirbyteStreamNameNamespacePair streamNamePair = AirbyteStreamNameNamespacePair

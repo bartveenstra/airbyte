@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
+<Configuration status="WARN" monitorInterval="30">
+  <Properties>
+    <Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%n</Property>
+  </Properties>
 
   <Appenders>
-    <Console name="ConsoleJSONAppender" target="SYSTEM_OUT">
-      <JsonTemplateLayout eventTemplateUri="classpath:AirbyteLogMessageTemplate.json"/>
+    <Console name="console" target="SYSTEM_OUT" follow="true">
+      <PatternLayout pattern="${LOG_PATTERN}"/>
     </Console>
   </Appenders>
+
   <Loggers>
-    <Root level="INFO" additivity="false">
-      <AppenderRef ref="ConsoleJSONAppender"/>
+    <Root level="debug">
+      <AppenderRef ref="console"/>
     </Root>
   </Loggers>
 </Configuration>

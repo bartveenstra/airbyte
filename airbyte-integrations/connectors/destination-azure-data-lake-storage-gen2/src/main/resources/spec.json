@@ -1,0 +1,153 @@
+{
+  "documentationUrl": "https://docs.airbyte.com/integrations/destinations/azureblobstorage",
+  "supportsIncremental": true,
+  "supportsNormalization": false,
+  "supportsDBT": false,
+  "supported_destination_sync_modes": ["overwrite", "append"],
+  "connectionSpecification": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "AzureDataLakeStorageGen2 Destination Spec",
+    "type": "object",
+    "required": [
+      "azure_data_lake_storage_gen2_authentication_mode",
+      "azure_data_lake_storage_gen2_storage_account_name",
+      "azure_data_lake_storage_gen2_container_name",
+      "format"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "azure_data_lake_storage_gen2_authentication_mode": {
+        "title": "Authentication mode",
+        "type": "object",
+        "description": "The authentication mode to connect to the Azure Data Lake Storage Gen2",
+        "order": 0,
+        "oneOf": [
+          {
+            "title" : "Shared Access Signature",
+            "description" : "A shared access signature (SAS) is a URI that grants restricted access to an Azure Storage container",
+            "required" : ["azure_data_lake_storage_gen2_sas_token"],
+            "type" : "object",
+            "properties": {
+              "authentication_mode": {
+                "type": "string",
+                "const": "SAS",
+                "enum": ["SAS"],
+                "default": "SAS"
+              },
+              "sas_token": {
+                "title": "Shared Access Signature",
+                "type": "string",
+                "airbyte_secret": true,
+                "description": "A shared access signature (SAS) is a URI that grants restricted access rights to Azure Storage resources",
+                "order": 1
+              }
+            }
+          },
+          {
+            "title" : "Storage Access Key",
+            "description" : "Access keys authenticate your applications’ requests to this storage account.",
+            "required" : ["azure_data_lake_storage_gen2_sas_token"],
+            "type" : "object",
+            "properties": {
+              "authentication_mode": {
+                "type": "string",
+                "const": "SAK",
+                "enum": ["SAK"],
+                "default": "SAK"
+              },
+              "storage_account_key": {
+                "title": "Storage Account Key",
+                "type": "string",
+                "airbyte_secret": true,
+                "description": "Storage Account Key",
+                "order": 1
+              }
+            }
+          }
+        ]
+
+      },
+      "azure_data_lake_storage_gen2_storage_account_name": {
+        "title": "Azure Data Lake Storage Gen2 Account Name",
+        "type": "string",
+        "description": "This is Azure Blob Storage  name.",
+        "examples": ["airbytesstorageaccountname"]
+      },
+      "azure_data_lake_storage_gen2_container_name": {
+        "title": "Azure Data Lake Storage Gen2 Container Name",
+        "type": "string",
+        "description": "The name of the Azure blob storage container. ",
+        "examples": ["airbytetescontainername"]
+      },
+      "azure_data_lake_storage_gen2_base_path": {
+        "title": "Azure Data Lake Storage Gen2 Base Path",
+        "type": "string",
+        "description": "The name of the path all streams will be copied into. Will be created if SAS key provides enough access rights",
+        "examples": ["/datalandingzone/"]
+      },
+      "format": {
+        "title": "Output Format",
+        "type": "object",
+        "description": "Output data format",
+        "oneOf": [
+          {
+            "title": "Parquet: Columnar Storage",
+            "required": ["format_type"],
+            "properties": {
+              "format_type": {
+                "title": "Format Type",
+                "type": "string",
+                "enum": ["PARQUET, AVRO"],
+                "default": "PARQUET"
+              },
+              "compression_codec": {
+                "title": "Compression Codec",
+                "description": "The compression algorithm used to compress data pages.",
+                "type": "string",
+                "enum": [
+                  "UNCOMPRESSED",
+                  "SNAPPY"
+                ],
+                "default": "UNCOMPRESSED"
+              },
+              "block_size_mb": {
+                "title": "Block Size (Row Group Size) (MB)",
+                "description": "This is the size of a row group being buffered in memory. It limits the memory usage when writing. Larger values will improve the IO when reading, but consume more memory when writing. Default: 128 MB.",
+                "type": "integer",
+                "default": 128,
+                "examples": [128]
+              },
+              "max_padding_size_mb": {
+                "title": "Max Padding Size (MB)",
+                "description": "Maximum size allowed as padding to align row groups. This is also the minimum size of a row group. Default: 8 MB.",
+                "type": "integer",
+                "default": 8,
+                "examples": [8]
+              },
+              "page_size_kb": {
+                "title": "Page Size (KB)",
+                "description": "The page size is for compression. A block is composed of pages. A page is the smallest unit that must be read fully to access a single record. If this value is too small, the compression will deteriorate. Default: 1024 KB.",
+                "type": "integer",
+                "default": 1024,
+                "examples": [1024]
+              },
+              "dictionary_page_size_kb": {
+                "title": "Dictionary Page Size (KB)",
+                "description": "There is one dictionary page per column per row group when dictionary encoding is used. The dictionary page size works like the page size but for dictionary. Default: 1024 KB.",
+                "type": "integer",
+                "default": 1024,
+                "examples": [1024]
+              },
+              "dictionary_encoding": {
+                "title": "Dictionary Encoding",
+                "description": "Default: true.",
+                "type": "boolean",
+                "default": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

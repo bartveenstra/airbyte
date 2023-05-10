@@ -19,13 +19,23 @@ class DatadogStream(HttpStream, ABC):
     primary_key: Optional[str] = None
     parse_response_root: Optional[str] = None
 
-    def __init__(self, site: str, query: str, max_records_per_request: int, start_date: str, end_date: str, **kwargs):
+    def __init__(
+        self,
+        site: str,
+        query: str,
+        max_records_per_request: int,
+        start_date: str,
+        end_date: str,
+        queries: List[Dict[str, str]] = None,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self.site = site
         self.query = query
         self.max_records_per_request = max_records_per_request
         self.start_date = start_date
         self.end_date = end_date
+        self.queries = queries or []
         self._cursor_value = None
 
     @property
@@ -287,3 +297,75 @@ class Users(PaginatedBasedListStream):
             self.current_page += 1
             next_page_token = {"offset": self.current_page}
         return next_page_token
+
+
+class SeriesStream(V2ApiDatadogStream, ABC):
+    """
+    https://docs.datadoghq.com/api/latest/metrics/?code-lang=curl#query-timeseries-data-across-multiple-products
+    """
+
+    #parse_response_root: Optional[str] = "data"
+
+    def __init__(self, name, data_source, query_string, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.data_source = data_source
+        self.query_string = query_string
+
+    @property
+    def http_method(self) -> str:
+        return "POST"
+
+    def path(self, **kwargs) -> str:
+        return "query/timeseries"
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    def request_body_json(
+        self,
+        stream_state: Mapping[str, Any],
+        stream_slice: Mapping[str, Any] = None,
+        next_page_token: Mapping[str, Any] = None,
+    ) -> Optional[Mapping]:
+
+        # Construct the payload
+        payload = {
+            "data": {
+                "type": "timeseries_request",
+                "attributes": {
+                    "to": 1682533225722,
+                    "from": 1682529625722,
+                    "queries": [
+                        {
+                            "data_source": self.data_source,
+                            "query": self.query_string,
+                            "name": self.name,
+                        }
+                    ],
+                },
+            }
+        }
+        print("Request payload:")
+        print(payload)
+        return payload
+
+    def get_json_schema(self) -> Mapping[str, Any]:
+        local_json_schema = {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {},
+            "additionalProperties": True,
+        }
+        return local_json_schema
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        return [response.json()]
+
+    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
+        return None
